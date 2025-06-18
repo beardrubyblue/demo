@@ -89,5 +89,63 @@ namespace WindowsFormsApp1
                 }
             }
         }
+
+        private void RentalsForm_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите запись для удаления.");
+                return;
+            }
+
+            var id = Convert.ToInt32(dataGridView1.SelectedRows[0].Cells["id"].Value);
+
+            var confirm = MessageBox.Show("Удалить аренду?", "Подтверждение", MessageBoxButtons.YesNo);
+            if (confirm != DialogResult.Yes) return;
+
+            using (var conn = new NpgsqlConnection(connStr))
+            {
+                conn.Open();
+                string sql = "DELETE FROM rentals WHERE id = @id";
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("id", id);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            LoadRentals();
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            RentalEditForm form = new RentalEditForm();
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                LoadRentals();
+            }
+        }
+
+        private void btnEdit_Click(object sender, EventArgs e)
+        {
+            if (dataGridView1.SelectedRows.Count == 0)
+            {
+                MessageBox.Show("Выберите аренду для редактирования.");
+                return;
+            }
+
+            int id = Convert.ToInt32(dataGridView1.SelectedRows[0].Cells["id"].Value);
+
+            RentalEditForm form = new RentalEditForm(id);
+            if (form.ShowDialog() == DialogResult.OK)
+            {
+                LoadRentals();
+            }
+        }
     }
 }
